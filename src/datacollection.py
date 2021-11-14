@@ -1,6 +1,9 @@
 ## Utilities functions related to the extraction and cleaning of the data
 ## Recommended shortcut "daco"?
 
+import os
+import json
+import pandas as pd
 
 def apidict(opmode, edit={}, debugverbose=False):
     """
@@ -10,9 +13,6 @@ def apidict(opmode, edit={}, debugverbose=False):
         'read' = will retrive the entire content of the API dictionary
     **args: dictionaries of {Data Service: APIKey}
     """
-    import os
-    import json
-    import pandas as pd
     
     # Builds path to API/key storage
     dicpath = os.getcwd()
@@ -63,3 +63,25 @@ def apidict(opmode, edit={}, debugverbose=False):
         raise ValueError("You want to edit but did not provide a dictionary.")
         return
                                 
+def dldocu(source=""):
+    """
+    Downloads the available documentation and/or tickers to provide for the API
+    calls needed by dldata where these are available.
+    - a
+    - b
+    - c
+    Returns a file with the tickers or display the list of options
+    Leave Source empty for list of available options
+    """
+    available = ["EUREX Futures"]
+    
+    if source == "":
+        print("Documentation available on the following:")
+        print(available)
+        return
+    elif source == "EUREX Futures":
+        docu = pd.read_csv("https://static.quandl.com/Ticker+CSV%27s/Futures/EUREX.csv",encoding='latin-1')
+    else:
+        raise ValueError("The documentation requested is not valid, check what is available")
+
+    return docu
