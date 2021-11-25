@@ -64,7 +64,7 @@ def apidict(opmode, edit={}, debugverbose=False):
         raise ValueError("You want to edit but did not provide a dictionary.")
         return
                                 
-def dldocu(source="", save=False):
+def docu_dl(source="", save=False):
     """
     Downloads the available documentation and/or tickers to provide for the API
     calls needed by dldata where these are available.
@@ -80,16 +80,25 @@ def dldocu(source="", save=False):
         return
     elif source == "NASDAQ EUREX Futures":
         docu = pd.read_csv("https://static.quandl.com/Ticker+CSV%27s/Futures/EUREX.csv",encoding='latin-1')
-        savename = "nasdaq_eurex"  # EFFICIENCY ISSUE - probably better to dynamically create the name of the file
+
+        # The meta data added here is to help with the creation of the filename
+        # The structure is predictable so it can be unwound to help with the standardisation
+        meta_provider = "nasdaq"
+        meta_desc = "eurex"
+        meta_subdesc = "futures"
+        save_name = meta_provider + "_" + meta_desc + "_" + meta_subdesc
         if save == True:
-            savecsv(docu, savename, "docs")
+            # Let's standardise the file at this stage and see if it causes problems
+            # Standardisation is simply adding identifiers (meta data) so it can be collated into one big table (the data catalogue)
+            docu = docu_standardise(docu, meta_provider, meta_desc, meta_subdesc)
+            save_csv(docu, save_name, "docs")
             return docu
     else:
         raise ValueError("The documentation requested is not valid, check what is available")
 
     return docu
 
-def savecsv(data, name, folder, mode="", debug=False):
+def save_csv(data, name, folder, mode="", debug=False):
     """
     Saves a dataframe to the requested folder
     data: dataframe to be saved
