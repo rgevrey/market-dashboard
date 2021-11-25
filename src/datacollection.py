@@ -80,8 +80,10 @@ def dldocu(source="", save=False):
         return
     elif source == "NASDAQ EUREX Futures":
         docu = pd.read_csv("https://static.quandl.com/Ticker+CSV%27s/Futures/EUREX.csv",encoding='latin-1')
+        savename = "nasdaq_eurex"  # EFFICIENCY ISSUE - probably better to dynamically create the name of the file
         if save == True:
-            
+            savecsv(docu, savename, "docs")
+            return docu
     else:
         raise ValueError("The documentation requested is not valid, check what is available")
 
