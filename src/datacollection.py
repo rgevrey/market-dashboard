@@ -5,6 +5,8 @@ import os
 import json
 import pandas as pd
 import csv
+import datetime
+import quandl
 
 def apidict(opmode, edit={}, debugverbose=False):
     """
@@ -96,7 +98,8 @@ def docu_dl(source="", save=False):
             return docu
     
     elif source == "ECB Data":
-        
+        # Nothing yet
+        print("Nothing yet")
     else:
         raise ValueError("The documentation requested is not valid, check what is available")
 
@@ -127,4 +130,89 @@ def save_csv(data, name, folder, mode="", debug=False):
     
     return
     
+def data_dl (dataref="", date="latest"):
+    """
+    Universal data download function that handles the different API calls based
+    on what is being requested. Will ask for your identifiers where required.
+    dataref: to provide the reference of the data to extract. The reference can be found in the datacatalogue.
+    date: 'latest' will use today as reference point and pull out the latest available data
+    Returns a time series.
+    Leave dataref blank for dictionary of available sources. 
+    """
+   
+    # Overall logic
+    # 1. Provide datareference and dates
+    #   a. If you don't know them you can retrieve a full list of what is available in the function
+    #   b. But for this list you need a consolidated list of catalogues!
+    # 2. The function retrieves the codes to get the data so you do not have to remember
+    #   a. Retrieves the codes from files for the service requested
+    #   b. If not available on the file then goes and download them from the support location
+    #   c. Builds the request
+    # 3. Sends the request to the API
+    # 4. If the time period isn't available then the next best?
+    # OUTPUT: data file downloaded
+
+    # To do - use the data catalogue function here
+    available = [
+        "NASDAQ EUREX Futures"
+    ]
     
+    # Loads up all the available API to only have one call to the file
+    api_dictionary = daco.apidict("read")
+    
+    # Works out the time period requested
+    # There will be adjustments made to the date to match the specific requirements of the API queries
+    if date == "latest":
+         date = datetime.datetime.now()
+    
+    # Shows data sources for which API calls are set up
+    # Otherwise proceeds with the downloads
+    if dataref == "":
+        return available
+
+    elif dataref == "NASDAQ EUREX Futures":
+        import quandl
+        
+        # Sets up the API based on the dictionary
+        quandl.ApiConfig.api_key = api_dictionary["NASDAQ"]
+        
+        # Futures delivery month codes
+        futures_delivery_month = {
+                "January": "F",
+                "February": "G",
+                "March": "H",
+                "April": "J",
+                "May": "K",
+                "June": "M",
+                "July": "N",
+                "August": "Q",
+                "September": "U",
+                "October": "V",
+                "November": "X",
+                "December": "Z"
+        }
+
+        # Building the query
+        # To do - retrieve the code dynically via the catalogue
+        query = {
+            "code" : "EUREX/FVS",
+            "month" : "",
+            "year" : ""
+        }
+
+        # Translating the data to the futures format
+        query['year'] = date.strftime('%Y')
+        query['month'] = futures_delivery_month[date.strftime('%B')]
+        query = query["code"] + query["month"] + query["year"]
+
+        # Limiting to the 10 previous days
+        # Converting to strings read by the API
+        date_delta = datetime.timedelta(days=-10)
+        start_date = date + date_delta
+        start_date = start_date.strftime('%Y') + "-" + start_date.strftime('%m') + "-" + start_date.strftime('%d')
+        end_date = date.strftime('%Y') + "-" + date.strftime('%m') + "-" + date.strftime('%d')
+
+        data = quandl.get('EUREX/FVSJ2022', column_index='1',start_date=start_date, end_date=end_date)
+    
+    return data
+
