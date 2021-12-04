@@ -72,12 +72,13 @@ def docu_dl(source="", save=False):
     Leave Source empty for list of available options
     Save = "True" to save the 
     """
-    available = ["NASDAQ EUREX Futures"]
+    available = ["ECB Data", "NASDAQ EUREX Futures"]
     
     if source == "":
         print("Documentation available on the following:")
         print(available)
         return
+    
     elif source == "NASDAQ EUREX Futures":
         docu = pd.read_csv("https://static.quandl.com/Ticker+CSV%27s/Futures/EUREX.csv",encoding='latin-1')
 
@@ -93,6 +94,9 @@ def docu_dl(source="", save=False):
             docu = docu_standardise(docu, meta_provider, meta_desc, meta_subdesc)
             save_csv(docu, save_name, "docs")
             return docu
+    
+    elif source == "ECB Data":
+        
     else:
         raise ValueError("The documentation requested is not valid, check what is available")
 
